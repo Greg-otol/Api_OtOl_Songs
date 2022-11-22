@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Artists {
+  id String @id @default(uuid())
+
+  name String @unique
+
+  createAt DateTime @default(now()) @map("created_at")
+  updateAt DateTime @updatedAt @map("updated_at")
+
+  artists   Songs[]
+  genders   Genders[]
+  profile   Profile[]
+  favorites FavoriteArtists[]
+}
+
+model Songs {
+  id String @id @default(uuid())
+
+  title          String
+  coverImageUrl  String @unique
+  year           Int
+  clipYoutubeUrl String
+
+  createAt DateTime @default(now()) @map("created_at")
+  updateAt DateTime @updatedAt @map("updated_at")
+
+  songs Artists[]
+}
+
+model Genders {
+  id String @id @default(uuid())
+
+  name String @unique
+
+  createAt DateTime @default(now()) @map("created_at")
+  updateAt DateTime @updatedAt @map("updated_at")
+
+  artistGender Artists[]
+}
+
+model User {
+  id       String  @id @default(uuid())
+  name     String
+  nickname String  @unique
+  email    String  @unique
+  password String
+  cpf      String  @unique
+  isAdmin  Boolean @default(false)
+
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  profiles Profile[]
+}
+
+model Profile {
+  id String @id @default(uuid())
+
+  title    String
+  imageUrl String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("user_id")
+
+  artists         Artists[]
+  favoriteArtists FavoriteArtists?
+
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+
+model FavoriteArtists {
+  id String @id @default(uuid())
+
+  profile   Profile @relation(fields: [profileId], references: [id])
+  profileId String  @unique @map("profile_id")
+
+  artists Artists[]
+
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}

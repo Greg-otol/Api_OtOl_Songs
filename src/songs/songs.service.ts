@@ -1,67 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/database/PrismaService';
-import { ISongs } from './dto/songs.dto';
+import { SongDto } from './dto/songs.dto';
+import { SongRepository } from './repository/song.repository';
 
 @Injectable()
 export class SongsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private repository: SongRepository) {}
 
-  async create(data: ISongs) {
-    const songExist = await this.prisma.songs.findFirst({
-      where: {
-        id: data.id,
-      },
-    });
-
-    if (songExist) {
-      throw new Error('Song already exists');
-    }
-
-    const song = await this.prisma.songs.create({
-      data,
-    });
-
-    return song;
+  async createSong(data: SongDto) {
+    return await this.repository.create(data);
   }
 
-  async findAll() {
-    return this.prisma.songs.findMany();
+  async findAllSongs() {
+    return this.repository.findAll();
   }
 
-  async update(id: string, data: ISongs) {
-    const songExist = await this.prisma.songs.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!songExist) {
-      throw new Error('Song does not exist');
-    }
-
-    return await this.prisma.songs.update({
-      data,
-      where: {
-        id,
-      },
-    });
+  async findById(id: string) {
+    return await this.repository.findById(id);
   }
 
-  async delete(id: string) {
-    const songExist = await this.prisma.songs.findUnique({
-      where: {
-        id,
-      },
-    });
+  async updateSong(id: string, data: SongDto) {
+    return await this.repository.update(id, data);
+  }
 
-    if (!songExist) {
-      throw new Error('Song does not exists');
-    }
-
-    return await this.prisma.songs.delete({
-      where: {
-        id,
-      },
-    });
+  async deleteSong(id: string) {
+    return await this.repository.delete(id);
   }
 }
